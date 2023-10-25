@@ -20,9 +20,13 @@ var userSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    pic:{
+    profilePic:{
         type: String,
+    },
+    admin:{
+        type: Boolean,
     }
+
 });
 
 //Export the model
