@@ -1,16 +1,27 @@
 const User = require('../models/userModel')
+const dotenv = require('dotenv')
+const jwt = require('jsonwebtoken');
+
+// .................Login Admin.........................
 
 const loginAdmin = async (req, res) => {
     try {
         const { email, password } = req.body
         if (!email || !password) return res.json({ error: 'Please provide all fields' });
         let userMatch = await User.findOne({ $and: [{ email }, { password }] });
-        if (userMatch.admin) {  //if user is admin
-            //JWT Token
-            //Redux
-            res.json({ msg: 'success' })
+        if (!userMatch) return res.json({ error: 'Invalid credentials' });                             //no user found
+        if (!userMatch.admin === true) return res.json({ error: 'User without admin previlages' });    //User but not admin
+        //if user is admin
+        const tokenData = await createToken(userMatch._id)   // generating JWT Token
+        const adminData = {                              // Token data + User Data
+            token: tokenData,
+            _id: userMatch._id,
+            name: userMatch.name,
+            email: userMatch.email,
+            phone: userMatch.phone
         }
-        else return res.json({ error: 'Invalid credentials' });
+        res.status(200).json(adminData)
+        //Redux to be done
 
     } catch (error) {
         console.log(error.message);
@@ -18,15 +29,28 @@ const loginAdmin = async (req, res) => {
     }
 }
 
+//create JWT Token
+const createToken = async (id) => {
+    try {
+        return await jwt.sign({ _id: id }, process.env.secretJWT, { expiresIn: '24h' });
+    } catch (error) {
+        return error.message
+    }
+}
+
+// ................Load all user's data........................
+
 const loadUsers = async (req, res) => {
     try {
-        let users = await User.find({ admin: { $exists: false } });   //Load all users except admin
+        let users = await User.find();   //Load all users except admin
         res.status(200).json(users)
     } catch (error) {
         console.log(error.message);
         res.status(500).json({ error: error.message })
     }
 }
+
+// .................Update User Data.........................
 
 const updateUser = async (req, res) => {
     try {
@@ -44,8 +68,24 @@ const updateUser = async (req, res) => {
     }
 }
 
+// .................Search Users.........................
+
+const userSearch = async (req, res) => {
+    try {
+        const startLetter = req.body.searchData
+        const regex = new RegExp(`^${startLetter}`, 'i');
+        const users = await User.find({ name: { $regex: regex } });   //find user with starting letter
+        res.status(200).json(users)
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: error.message })
+    }
+}
+
 module.exports = {
     loginAdmin,
     loadUsers,
     updateUser,
+    userSearch,
 }
