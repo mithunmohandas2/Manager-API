@@ -18,7 +18,8 @@ const loginAdmin = async (req, res) => {
             _id: userMatch._id,
             name: userMatch.name,
             email: userMatch.email,
-            phone: userMatch.phone
+            phone: userMatch.phone,
+            admin: userMatch.admin
         }
         res.status(200).json(adminData)
         //Redux to be done
@@ -83,9 +84,26 @@ const userSearch = async (req, res) => {
     }
 }
 
+// -----------------delete User-------------------------
+
+const deleteUser = async (req, res) => {
+    try {
+        console.log(req.body._id)
+        const users = await User.findByIdAndDelete({ _id: req.body._id });
+        res.status(200).json(users)
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: error.message })
+    }
+}
+
+// ------------------------------------------------------------
+
 module.exports = {
     loginAdmin,
     loadUsers,
     updateUser,
     userSearch,
+    deleteUser,
 }
