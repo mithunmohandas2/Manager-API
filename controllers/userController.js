@@ -48,7 +48,8 @@ const loginUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
-                admin: user.admin
+                admin: user.admin,
+                profilePic: user.profilePic,
             }
 
             res.status(200).json(userData)
