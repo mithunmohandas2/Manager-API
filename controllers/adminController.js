@@ -61,7 +61,18 @@ const updateUser = async (req, res) => {
         let users = await User.findByIdAndUpdate(_id, updatedData, { new: true });
         if (!users) return res.json({ error: 'User not found' });
 
-        res.status(200).json(users)
+        // res.status(200).json(users)
+
+        const updatedUser = await User.findOne({ _id });
+        res.status(200).json({
+            _id: updatedUser._id,
+            phone: updatedUser.phone,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            admin: updatedUser.admin,
+            profilePic: updatedUser.profilePic ? updatedUser.profilePic : null,
+            token: req.headers["authorization"],
+        })
 
     } catch (error) {
         console.log(error.message);

@@ -83,7 +83,18 @@ const uploadPhoto = async (req, res) => {
             return res.json({ error: "User not found" })
         }// no user found in database
         const profilePicUpdate = await User.updateOne({ _id: req.body._id }, { $set: { profilePic: imagePath } });
-        if (profilePicUpdate) res.status(200).json({ ok: 'success' });
+        if (profilePicUpdate) {
+            const updatedUser = await User.findOne({ _id: req.body._id });
+            res.status(200).json({
+                _id: updatedUser._id, 
+                phone: updatedUser.phone, 
+                name: updatedUser.name, 
+                email: updatedUser.email, 
+                admin: updatedUser.admin, 
+                profilePic: updatedUser.profilePic,
+                token : req.headers["authorization"],
+            })
+        }
         else return res.json({ error: "Unable to update profile pic" })
 
     } catch (error) {
